@@ -1,0 +1,37 @@
+body {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    background-color: #f9f9f9;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.container {
+    border: 3px solid black;
+    border-radius: 15px;
+    padding: 20px;
+    background: white;
+    width: 450px;
+    text-align: center;
+}
+.register-text {
+    color: orange;
+    font-size: 20px;
+}
+.btn-primary {
+    background-color: #87CEFA;
+    border: 2px solid #1E90FF;
+    color: black;
+}
+.btn-primary:hover {
+    background-color: #1E90FF;
+    color: white;
+}
+.signup a {
+    color: red;
+    font-weight: bold;
+    text-decoration: none;
+}
+.signup a:hover {
+    text-decoration: underline;
+}
