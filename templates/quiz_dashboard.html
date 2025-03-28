@@ -1,0 +1,66 @@
+{% extends 'base_admin_dashboard.html' %}
+{% block extend %}
+<!-- Search Bar -->
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <div class="w-25">
+            <input type="text" class="form-control w-full mb-2" placeholder="Search">
+<a href="{{ url_for('create_quiz_choose_subject', curr_login_id=session['user_id']) }}" class="btn btn-primary">
+                Create Quiz
+            </a>
+        </div>
+        <span class="fw-bold text-primary">Welcome Quiz Master</span>
+    </div>
+
+    <!-- Quiz Cards  -->
+    <div class="row mt-4">
+        <!-- Each quiz card -->
+        {% for quiz in quizes %}
+        <div class="col-md-6">
+            <div class="card shadow-sm m-3 p-3">
+                <div class="d-flex ps-2">
+                        <div >
+                            <h5 class="fw-bold w-full">
+                            Quiz {{quiz.id}}
+                            </h5>
+
+                        </div>
+                    <a href="{{ url_for('update_quiz_choose_subject', curr_login_id=session['user_id'],quiz_id=quiz.id) }}"
+                        class="btn btn-sm rounded ms-auto">
+                            <img src="{{ url_for('static', filename='Edit_icon.png') }}" alt="Edit" width="30" height="30">    
+                    </a>
+                    <a href="{{ url_for('delete_quiz', curr_login_id=session['user_id'], quiz_id=quiz.id) }}"
+                        class="btn btn-sm ms-2">
+                        <img src="{{ url_for('static', filename='Delete_icon.png') }}" alt="Delete" width="30" height="30">
+                    </a>
+                    <a href="{{ url_for('question_dashboard', curr_login_id=session['user_id'], quiz_id=quiz.id) }}"
+                        class="btn btn-sm ms-2">
+                        <img src="{{ url_for('static', filename='Add_icon.png') }}" alt="Add" width="30" height="30">
+                    </a>        
+                </div>
+                <table class="table">
+                    <thead class="bg-primary text-white">
+                        <tr>
+                            <th>Subject Name</th>
+                            <th>Chapter Name</th>
+                            <th>Quiz Date</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        <tr>
+                            <td>{{quiz.chapter.subject.name}}</td>
+                            <td>{{quiz.chapter.name}}</td>
+                            <td>{{quiz.date_of_quiz}}</td>
+                            <td>{{quiz.time_duration}}</td>
+                        </tr>
+
+                    </tbody>
+                </table>
+
+
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}

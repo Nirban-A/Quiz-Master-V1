@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Question</title>
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+
+<body>
+
+    <div class="container mt-5 p-4 border rounded shadow bg-white" style="max-width: 500px; text-align: center;">
+        <h2 class="text-warning">New Question</h2>
+
+        <form method="POST" action="{{url_for('update_question', curr_login_id=curr_login_id, question_id=question.id) }}">
+
+            <div class="mb-3 text-start">
+                <label for="question_statement" class="form-label">Question Statement:</label>
+                <textarea class="form-control border-primary" id="question_statement" name="question_statement"
+                    rows="2" required>{{question.statement}}</textarea>
+            </div>
+
+            <div class="mb-3 text-start">
+                <label for="option_1" class="form-label">Option 1:</label>
+                <textarea class="form-control border-primary" id="option_1" name="option_1"
+                    rows="1" required>{{question.option_1}}</textarea>
+            </div>
+            <div class="mb-3 text-start">
+                <label for="option_2" class="form-label">Option 2:</label>
+                <textarea class="form-control border-primary" id="option_2" name="option_2"
+                    rows="1" required>{{question.option_2}}</textarea>
+            </div>
+            <div class="mb-3 text-start">
+                <label for="option_3" class="form-label">Option 3:</label>
+                <textarea class="form-control border-primary" id="option_3" name="option_3"
+                    rows="1">{{question.option_3}}</textarea>
+            </div>
+            <div class="mb-3 text-start">
+                <label for="option_4" class="form-label">Option 4 :</label>
+                <textarea class="form-control border-primary" id="option_4" name="option_4"
+                    rows="1">{{question.option_4}}</textarea>
+            </div>
+            <div class="mb-3 text-start">
+                <label for="correct_option" class="form-label">Correct Option No :</label>
+                <input type="number" min="1" max="4" class="form-control border-primary"
+                 id="correct_option" name="correct_option" value="{{question.correct_option}}" required>
+            </div>
+            {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <p class="alert alert-{{ category }}">{{ message}}</p>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <button type="submit" class="btn btn-primary me-2">Save</button>
+            <a href="{{ url_for('question_dashboard', curr_login_id=session['user_id'], quiz_id=question.quiz.id) }}"
+                class="btn btn-primary">Cancel</a>
+        </form>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

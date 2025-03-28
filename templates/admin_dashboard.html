@@ -1,0 +1,67 @@
+{% extends 'base_admin_dashboard.html' %}
+{% block extend %}
+<!-- Search Bar -->
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <div class="w-25">
+            <input type="text" class="form-control w-full mb-2" placeholder="Search">
+            <a href="{{ url_for('create_subject', curr_login_id=session['user_id']) }}" class="btn btn-primary">
+                Create Subject
+            </a>
+        </div>
+        <span class="fw-bold text-primary">Welcome Quiz Master</span>
+    </div>
+
+    <!-- Subject Cards  -->
+    <div class="row mt-4">
+        <!-- Each Subject card -->
+        {% for subject in subjects %}
+        <div class="col-md-6">
+            <div class="card shadow-sm m-3 p-3">
+                <div class="d-flex ps-2">
+                    <h5 class="fw-bold d-inline-block">
+                        {{subject.name}}
+                    </h5>
+                    <a href="{{ url_for('update_subject', curr_login_id=session['user_id'], subject_id=subject.id) }}"
+                        class="btn btn-sm  ms-auto">
+                        <img src="{{ url_for('static', filename='Edit_icon.png') }}" alt="Edit" width="30" height="30">    
+                    </a>
+                    <a href="{{ url_for('delete_subject', curr_login_id=session['user_id'], subject_id=subject.id) }}"
+                        class="btn btn-sm ms-2">
+                        <img src="{{ url_for('static', filename='Delete_icon.png') }}" alt="Delete" width="30" height="30">    
+                    </a>
+
+                </div>
+                <table class="table">
+                    <thead class="bg-primary text-white">
+                        <tr>
+                            <th>Chapter Name</th>
+                            <th>No. of Quizes</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for chapter in subject.chapters %}
+                        <tr>
+                            <td>{{chapter.name}}</td>
+                            <td>{{chapter.quizes|length}}</td>
+                            <td>
+                                <a href="{{ url_for('update_chapter', curr_login_id=session['user_id'], chapter_id=chapter.id) }}"
+                                    class="btn btn-sm bg-secondary-subtle">Edit</a>
+                                <a href="{{ url_for('delete_chapter', curr_login_id=session['user_id'], chapter_id=chapter.id) }}"
+                                    class="btn btn-sm btn-danger">Delete</a>
+                            </td>
+                        </tr>
+                        
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <a href="{{ url_for('create_chapter', curr_login_id=session['user_id'], subject_id=subject.id) }}"
+                    class="btn bg-secondary-subtle">
+                    Create Chapter <img src="{{ url_for('static', filename='Add_icon.png') }}" alt="Add" width="30" height="30">
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}

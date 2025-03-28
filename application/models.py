@@ -11,7 +11,8 @@ class User(db.Model):
     role = db.Column(db.Boolean, nullable=False, default=False)  # will store True for admin
 
     quizes_attempted = db.relationship('Score', backref='user') 
-    #If I need always the score along with user then the parameter lazy can be used for speed up
+    #If I need always the score along with user then the parameter lazy can be used
+    #cascading can be have to be implemented so when a subjects get deleted the chapter and .. under it also gets delted
 
 class Subject(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -24,7 +25,7 @@ class Subject(db.Model):
 class Chapter(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
-    name = db.Column(db.String(150), nullable=False)
+    name = db.Column(db.String(150), unique=True, nullable=False)
     description = db.Column(db.Text)
     subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'), nullable=False)
 
@@ -35,8 +36,8 @@ class Quiz(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     chapter_id = db.Column(db.Integer, db.ForeignKey('chapter.id'), nullable=False)
 
-    date_of_quiz = db.Column(db.Date, nullable=False)
-    time_duration = db.Column(db.Time, nullable=False)  
+    date_of_quiz = db.Column(db.Date)#, nullable=False) #disabled to create the CRUD
+    time_duration = db.Column(db.Time)#, nullable=False) #disabled to create the CRUD
     remarks = db.Column(db.Text, nullable=True)
 
     questions = db.relationship('Question', backref='quiz', cascade='all, delete-orphan')
@@ -47,11 +48,11 @@ class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'), nullable=False)
 
-    question_statement = db.Column(db.Text, nullable=False)
+    statement = db.Column(db.Text, nullable=False) #modified from question_statement to statement
     option_1 = db.Column(db.String(255), nullable=False)
     option_2 = db.Column(db.String(255), nullable=False)
-    option_3 = db.Column(db.String(255), nullable=False)
-    option_4 = db.Column(db.String(255), nullable=False)
+    option_3 = db.Column(db.String(255) )#, nullable=False) #for true false question
+    option_4 = db.Column(db.String(255))#, nullable=False)
     correct_option = db.Column(db.Integer, nullable=False) #will store the option number
     #will add another column later to store marks of the questions to include the cases where each question may not have the same marks 
 
@@ -61,6 +62,6 @@ class Score(db.Model):
     quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
-    time_stamp = db.Column(db.DateTime, nullable=False)
+    time_stamp = db.Column(db.DateTime, nullable=False) #want to use datetime.utcnow kind of thing
     user_score = db.Column(db.Integer, nullable=False)
     total_score = db.Column(db.Integer, nullable=False)
