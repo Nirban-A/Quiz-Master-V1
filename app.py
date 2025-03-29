@@ -5,7 +5,7 @@ from flask import render_template, request, redirect, url_for, session, flash
 from sqlalchemy.exc import IntegrityError
 
 from application.models import * #because we are creating the database here as of now
-from datetime import datetime    #imported for registration(so can insert the dob in the db)
+from datetime import datetime, date    #imported for registration(so can insert the dob in the db) and also to for the deadline of quiz
 
 
 
@@ -34,7 +34,7 @@ with app.app_context():
 
 @app.route("/")
 def test():
-    #return render_template("test.html", user_name="test", password="pass", name="abra ca dabra", qualification="metrix", dob="28-11-2002")
+    #return render_template("test.html")
     return redirect(url_for('login'))
 
 @app.route("/register", methods=['GET', 'POST'])
@@ -138,6 +138,15 @@ def admin_dashboard(curr_login_id):
  
     subjects= Subject.query.all()
     return render_template("admin_dashboard.html",subjects=subjects)
+
+@app.route('/admin_dashboard/score/<int:curr_login_id>')
+def score_dashboard(curr_login_id):
+    if not is_admin(curr_login_id):
+        flash("You are not authorized","danger")
+        return redirect(url_for('logout'))
+ 
+    scores= Score.query.all()
+    return render_template("admin_dashboard_scores.html",scores=scores)
 
 @app.route('/admin_dashboard/<int:curr_login_id>/create_subject', methods=['GET','POST'])
 def create_subject(curr_login_id):
@@ -469,11 +478,11 @@ def create_question(curr_login_id,quiz_id):
         return redirect(url_for('logout'))
 
     if request.method=='POST':
-        question_statement=request.form["question_statement"]
-        option_1=request.form["option_1"]
-        option_2=request.form["option_2"]
-        option_3=request.form["option_3"]
-        option_4=request.form["option_4"]
+        question_statement=request.form["question_statement"].strip()
+        option_1=request.form["option_1"].strip()
+        option_2=request.form["option_2"].strip()
+        option_3=request.form["option_3"].strip()
+        option_4=request.form["option_4"].strip()
         correct_option=int(request.form["correct_option"])
 
         try:
@@ -502,11 +511,11 @@ def update_question(curr_login_id,question_id):
     question=Question.query.get_or_404(question_id)
     if request.method=='POST':
         try:
-            question.statement=request.form["question_statement"]
-            question.option_1=request.form["option_1"]
-            question.option_2=request.form["option_2"]
-            question.option_3=request.form["option_3"]
-            question.option_4=request.form["option_4"]
+            question.statement=request.form["question_statement"].strip()
+            question.option_1=request.form["option_1"].strip()
+            question.option_2=request.form["option_2"].strip()
+            question.option_3=request.form["option_3"].strip()
+            question.option_4=request.form["option_4"].strip()
             question.correct_option=int(request.form["correct_option"])
             db.session.commit()
 
@@ -548,10 +557,120 @@ def delete_question(curr_login_id,question_id):
         
     return render_template("delete_question.html",curr_login_id=curr_login_id,quiz_id=quiz_id)
 
+@app.route('/admin_dashboard/users/<int:curr_login_id>')
+def admin_dashboard_users(curr_login_id):
+    if not is_admin(curr_login_id):
+        flash("You are not authorized","danger")
+        return redirect(url_for('logout'))
+ 
+    users= User.query.all()
+    return render_template("admin_dashboard_users.html",users=users)
+
+@app.route('/admin_dashboard/edit_user/<int:curr_login_id>/<int:user_id>', methods=['GET', 'POST'])
+def edit_user(curr_login_id,user_id):
+    if not is_admin(curr_login_id):
+        flash("You are not authorized","danger")
+        return redirect(url_for('logout'))
+    
+    user=User.query.get_or_404(user_id)
+    if request.method=='POST':
+        try:
+            user.username=request.form["username"].strip()
+            user.password=request.form["password"]
+            user.full_name=request.form["name"].strip()
+            user.qualification=request.form["qualification"].strip()
+
+            db.session.commit()
+            print("User updation Successful")  #for debugging purposes
+            return redirect(url_for('admin_dashboard_users',curr_login_id=curr_login_id))
+
+        
+        except IntegrityError:
+            db.session.rollback()
+            flash("Given email id is already registered")
+            return redirect(url_for('edit_user',curr_login_id=curr_login_id,user_id=user_id))
+
+    return render_template("update_user.html",user=user)
+
+@app.route('/admin_dashboard/delete_user/<int:curr_login_id>/<int:user_id>', methods=['GET','POST'])
+def delete_user(curr_login_id,user_id):
+    if not is_admin(curr_login_id):
+        flash("You are not authorized","danger")
+        return redirect(url_for('logout'))
+
+    user=User.query.get_or_404(user_id)
+    if request.method=='POST':
+        try:
+            db.session.delete(user)
+            db.session.commit()
+            print("Question deletion Successful")  #for debugging purposes
+            return redirect(url_for('admin_dashboard_users',curr_login_id=curr_login_id))
+    
+    #have to deleted after testing
+        except IntegrityError:
+            db.session.rollback()
+            flash("Something went wrong, Try again",'danger')
+            return redirect(url_for('delete_user',curr_login_id=curr_login_id,user_id=user_id))
+        
+    return render_template("delete_user.html",curr_login_id=curr_login_id,user=user)
+
+
+#function to check if the current user is authorised
+def is_user(curr_login_id):
+    if "user_id" in session and session['user_id']==curr_login_id:
+        user=User.query.get(curr_login_id) 
+        return True
+    return False 
 
 @app.route('/user/<int:curr_login_id>/user_dashboard')
 def user_dashboard(curr_login_id):
-    return render_template("user_dashboard.html",curr_login_id=curr_login_id)
+    if not is_user(curr_login_id):
+        flash("You are not authorized","danger")
+        return redirect(url_for('logout'))
+    user = User.query.get(session['user_id'])
+    quizes=Quiz.query.all()
+    todays_date=date.today()
+    return render_template("user_dashboard.html",user=user,quizes=quizes,todays_date=todays_date)
+
+
+from datetime import datetime
+
+@app.route('/user/<int:curr_login_id>/exam_portal/<int:quiz_id>', methods=['GET', 'POST'])
+def exam_portal(curr_login_id, quiz_id):
+    if not is_user(curr_login_id):
+        flash("You are not authorized", "danger")
+        return redirect(url_for('logout'))
+    
+    quiz = Quiz.query.get_or_404(quiz_id)
+
+    if request.method == 'POST':
+        user_score = 0
+        total_score = len(quiz.questions)  
+
+        for question in quiz.questions:
+            selected_option = request.form.get(f'answer_{question.id}')  
+            
+            if selected_option and int(selected_option) == question.correct_option:
+                user_score += 1  # Increase score for correct answers
+
+        # Store the score in the database
+        new_score = Score(
+            quiz_id=quiz.id,
+            user_id=curr_login_id,
+            time_stamp=datetime.now(),
+            user_score=user_score,
+            total_score=total_score
+        )
+        db.session.add(new_score)
+        db.session.commit()
+
+        print(f"Your answers have been submitted! Score: {user_score}/{total_score}", "success")
+        return redirect(url_for('user_dashboard', curr_login_id=curr_login_id))
+
+    return render_template("exam_portal.html", quiz=quiz)
+
+
+
 
 
 

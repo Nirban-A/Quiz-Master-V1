@@ -1,0 +1,114 @@
+{% extends 'base_user_dashboard.html' %}
+{% block extend %}
+
+<form method="POST" id="quiz-form">
+    <template data-time="{{quiz.time_duration}}"></template>
+    <!-- Question Cards  -->
+    <div class="row mt-4">
+        <h4 class="sticky-top bg-body-secondary p-2 shadow-sm rounded">Time left: <span id="time-left">--:--<span></h4>
+        <!-- Each quiz card -->
+        {% for question in quiz.questions %}
+        <div class="col-md-12">
+            <div class="card shadow-sm m-3 p-3">
+                <!-- Display Question Statement -->
+                <label for="question_statement" class="fw-bold">{{ loop.index }}. {{ question.statement }}</label>
+
+                <div class="d-flex flex-column mt-2">
+                    <!-- Radio Buttons (Same name for all options of a question) -->
+                    <div>
+                        <input type="radio" id="option1_{{ question.id }}" name="answer_{{ question.id }}" value="1">
+                        <label for="option1_{{ question.id }}">{{ question.option_1 }}</label>
+                    </div>
+                    <div>
+                        <input type="radio" id="option2_{{ question.id }}" name="answer_{{ question.id }}" value="2">
+                        <label for="option2_{{ question.id }}">{{ question.option_2 }}</label>
+                    </div>
+                    <div>
+                        <input type="radio" id="option3_{{ question.id }}" name="answer_{{ question.id }}" value="3">
+                        <label for="option3_{{ question.id }}">{{ question.option_3 }}</label>
+                    </div>
+                    <div>
+                        <input type="radio" id="option4_{{ question.id }}" name="answer_{{ question.id }}" value="4">
+                        <label for="option4_{{ question.id }}">{{ question.option_4 }}</label>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+
+            </div>
+        </div>
+        {% endfor %}
+        <div class="col-12 ps-4 pb-4">
+            <button type="submit" class="btn btn-primary mt-3">Submit</button>
+        </div>
+    </div>
+</form>
+<script>
+    function autoSubmit() {
+        const timeStr = document.querySelector("template[data-time]").getAttribute("data-time")
+
+        // disable auto submit if no time limit is there
+        if (timeStr === "None") {
+            document.getElementById("time-left").textContent = "no limit";
+            return;
+        }
+        
+        // Parse the time string into hours, minutes, and seconds
+        const [targetHour, targetMinute, targetSecond] = timeStr.split(":").map(Number);
+
+        // Get the current date and time
+        const now = new Date();
+
+        // Create a Date object for the target time today
+        let targetTime = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate(),
+            targetHour,
+            targetMinute,
+            targetSecond
+        );
+
+        // If the target time has already passed today, set it for tomorrow
+        if (targetTime <= now) {
+            targetTime.setDate(targetTime.getDate() + 1);
+        }
+
+        // Calculate the delay in milliseconds
+        const delay = targetTime - now;
+
+        // Interval to update the countdown every second
+        const countdownInterval = setInterval(() => {
+            const currentTime = new Date();
+            let diff = targetTime - currentTime;
+
+            // If the time is up, clear the interval and update the text to 00:00
+            if (diff <= 0) {
+                clearInterval(countdownInterval);
+                document.getElementById("time-left").textContent = "00:00";
+                return;
+            }
+
+            // Calculate minutes and seconds left
+            const minutes = Math.floor(diff / 1000 / 60);
+            const seconds = Math.floor((diff / 1000) % 60);
+
+            // Format minutes and seconds with leading zeros if needed
+            const formattedMinutes = minutes.toString().padStart(2, "0");
+            const formattedSeconds = seconds.toString().padStart(2, "0");
+
+            // Update the countdown display
+            document.getElementById("time-left").textContent = `${formattedMinutes}:${formattedSeconds}`;
+        }, 1000);
+
+        // Set a timer to auto submit the form at the target time
+        setTimeout(() => {
+            const form = document.getElementById("quiz-form");
+            console.log("Auto submitting the form...");
+            form.submit();
+        }, delay);
+    }
+
+    autoSubmit();
+</script>
+{% endblock %}

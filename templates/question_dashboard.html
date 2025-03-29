@@ -11,7 +11,7 @@
     <!-- Quiz Card  -->
     <div class="row mt-4 justify-content-center">
         <!-- Each quiz card -->
-        <div class="col-md-11">
+        <div class="col-md-12">
             <div class="card shadow-sm m-3 p-3">
                 <div class="d-flex ps-2">
                         <div >
@@ -56,7 +56,7 @@
                             <td>{{question.correct_option}}</td>
                             <td>
                                 <a href="{{ url_for('update_question', curr_login_id=session['user_id'], question_id=question.id) }}"
-                                class="btn btn-sm bg-secondary-subtle">Edit</a>
+                                class="btn btn-light btn-sm bg-secondary-subtle">Edit</a>
                                 <a href="{{ url_for('delete_question', curr_login_id=session['user_id'], question_id=question.id) }}"
                                 class="btn btn-sm btn-danger">Delete</a>
                             </td>

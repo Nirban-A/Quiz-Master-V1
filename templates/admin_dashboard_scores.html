@@ -1,0 +1,71 @@
+{% extends 'base_admin_dashboard.html' %}
+{% block extend %}
+<!-- Search Bar -->
+<div class="d-flex justify-content-between align-items-center mt-3">
+    <div class="w-25">
+        <input type="text" class="form-control w-full mb-2" placeholder="Search" id="search-box"
+            onkeyup="searchUsers()">
+    </div>
+    <span class="fw-bold text-primary">Welcome Quiz Master</span>
+</div>
+
+<div class="row mt-4 justify-content-center">
+    <div class="col-md-11">
+        <div class="card shadow-sm m-3 p-3">
+            <div class="d-flex ps-2">
+
+            </div>
+            <table class="table">
+                <thead class="bg-primary text-white">
+                    <tr class="user-details">
+                        <th>Quiz ID</th>
+                        <th>Subject</th>
+                        <th>Chapter</th>
+                        <th>Username</th>
+                        <th>Marks(%)</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for score in scores %}
+                    <tr class="user-details">
+                        <td>{{score.quiz_id}}</td>
+                        <td>{{score.quiz.chapter.subject.name}}</td>
+                        <td>{{score.quiz.chapter.name}}</td>
+                        <td>{{score.user.username}}</td>
+                        <td>{% if score.total_score != 0 %}
+                            {{ "%.2f"|format((score.user_score / score.total_score) * 100) }}%
+                        {% else %}
+                            N/A
+                        {% endif %}</td>
+                        <td>{{score.time_stamp}}</td>
+
+                    </tr>
+
+                    {% endfor %}
+                </tbody>
+            </table>
+
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function searchUsers() {
+        const input = document.getElementById("search-box");
+        const query = input.value.toUpperCase();
+        const userColumns = document.querySelectorAll(".user-details");
+
+        // Loop through all list items, and hide those who don't match the search query
+        userColumns.forEach(userColumn => {
+            const userDetails = userColumn.innerHTML;
+            if (userDetails.toUpperCase().indexOf(query) > -1) {
+                userColumn.style.display = "";
+            } else {
+                userColumn.style.display = "none";
+            }
+        })
+    }
+</script>
+{% endblock %}

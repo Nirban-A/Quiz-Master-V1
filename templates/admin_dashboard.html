@@ -3,7 +3,7 @@
 <!-- Search Bar -->
     <div class="d-flex justify-content-between align-items-center mt-3">
         <div class="w-25">
-            <input type="text" class="form-control w-full mb-2" placeholder="Search">
+            <input type="text" class="form-control w-full mb-2" placeholder="Search" id="search-box" onkeyup="searchSubjects()">
             <a href="{{ url_for('create_subject', curr_login_id=session['user_id']) }}" class="btn btn-primary">
                 Create Subject
             </a>
@@ -16,17 +16,17 @@
         <!-- Each Subject card -->
         {% for subject in subjects %}
         <div class="col-md-6">
-            <div class="card shadow-sm m-3 p-3">
+            <div class="card shadow-sm m-3 p-3 subject-card">
                 <div class="d-flex ps-2">
-                    <h5 class="fw-bold d-inline-block">
+                    <h5 class="fw-bold d-inline-block subject-name">
                         {{subject.name}}
                     </h5>
                     <a href="{{ url_for('update_subject', curr_login_id=session['user_id'], subject_id=subject.id) }}"
-                        class="btn btn-sm  ms-auto">
+                        class="btn btn-light  ms-auto">
                         <img src="{{ url_for('static', filename='Edit_icon.png') }}" alt="Edit" width="30" height="30">    
                     </a>
                     <a href="{{ url_for('delete_subject', curr_login_id=session['user_id'], subject_id=subject.id) }}"
-                        class="btn btn-sm ms-2">
+                        class="btn btn-light ms-2">
                         <img src="{{ url_for('static', filename='Delete_icon.png') }}" alt="Delete" width="30" height="30">    
                     </a>
 
@@ -46,7 +46,7 @@
                             <td>{{chapter.quizes|length}}</td>
                             <td>
                                 <a href="{{ url_for('update_chapter', curr_login_id=session['user_id'], chapter_id=chapter.id) }}"
-                                    class="btn btn-sm bg-secondary-subtle">Edit</a>
+                                    class="btn btn-sm btn-light bg-secondary-subtle">Edit</a>
                                 <a href="{{ url_for('delete_chapter', curr_login_id=session['user_id'], chapter_id=chapter.id) }}"
                                     class="btn btn-sm btn-danger">Delete</a>
                             </td>
@@ -64,4 +64,22 @@
         </div>
         {% endfor %}
     </div>
+
+    <script>
+        function searchSubjects() {
+            const input = document.getElementById("search-box");
+            const query = input.value.toUpperCase();
+            const subjectCards = document.querySelectorAll(".subject-card");
+    
+            // Loop through all list items, and hide those who don't match the search query
+            subjectCards.forEach(subjectCard => {
+                const subjectName = subjectCard.getElementsByClassName("subject-name")[0].innerHTML;
+                if (subjectName.toUpperCase().indexOf(query) > -1) {
+                    subjectCard.style.display = "";
+                } else {
+                    subjectCard.style.display = "none";
+                }
+            })
+        }
+    </script> 
 {% endblock %}
