@@ -8,7 +8,6 @@ from application.models import * #because we are creating the database here as o
 from datetime import datetime, date    #imported for registration(so can insert the dob in the db) and also to for the deadline of quiz
 
 
-
 app = Flask(__name__)
 app.secret_key = 'your_secret_key' #need this for the flash function
 app.config["SQLALCHEMY_DATABASE_URI"]="sqlite:///quiz_master_v1.sqlite3"
@@ -33,9 +32,8 @@ with app.app_context():
         print("Admin user created!")
 
 @app.route("/")
-def test():
-    #return render_template("test.html")
-    return redirect(url_for('login'))
+def base():
+    return redirect(url_for('logout'))
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
@@ -47,15 +45,11 @@ def register():
         dob=request.form["dob"]
         if dob:
             try:
-                dob = datetime.strptime(dob, '%Y-%m-%d').date()  # Convert to Python date
+                dob = datetime.strptime(dob, '%Y-%m-%d').date() 
             except:
                 pass
         else:
             dob = None
-
-#the following two lines are only for testing purposes
-        print("details ------ \n")
-        print(username, password, name, qualification, dob)  #for debugging purposes
 
         try:
             new_user=User(username=username, password=password, full_name=name, qualification=qualification, dob=dob, role=False) #dob=dob, omitting it ony during the testing
@@ -63,14 +57,12 @@ def register():
             db.session.commit()
 
             flash("You have registered successfully",'success')
-            print("Registration Successful")  #for debugging purposes
             return redirect(url_for('login'))
         
         except IntegrityError:
             db.session.rollback()
             error_message="Username (email) already exists"
             flash(error_message,'danger')
-            print(error_message) #for debugging purposes
             return redirect(url_for('register'))
 
     return render_template("register.html")
@@ -80,27 +72,20 @@ def login():
     if request.method=='POST':
         username=request.form["username"]
         password=request.form["password"]
-        print(username, password) #for testing only
 
         user=User.query.filter(User.username==username).first()
         if user:
-            #the following line is for debugging only
-            print(f"Found User: {user.username}, Role: {user.role}, Password {password}, DB_Password: {user.password}")
 
             if user.password==password:
                 session['user_id']=user.id
                 return redirect(url_for('dashboard',curr_login_id=user.id))
 
             else:
-                error_message="Incorrect password. Please try again."
-                flash(error_message, "danger")
-                print(error_message)  #remove this line later. For debugging purposes
+                flash("Incorrect password. Please try again.", "danger")
                 return redirect(url_for('login'))
 
         else:
-            error_message="Email does not exist. Please register."
-            flash(error_message, "danger")
-            print(error_message)  #remove this line later. For debugging purposes
+            flash("Email does not exist. Please register.", "danger")
         return redirect(url_for('login'))
 
     return render_template("login.html")
@@ -111,7 +96,6 @@ def logout():
     return redirect(url_for('login'))
 
 
-#function to check if the current user is really admin
 def is_admin(curr_login_id):
     if "user_id" in session and session['user_id']==curr_login_id:
         user=User.query.get(curr_login_id) 
@@ -164,14 +148,11 @@ def create_subject(curr_login_id):
             db.session.add(new_subject)
             db.session.commit()
 
-            print("new subject addition Successful")  #for debugging purposes
             return redirect(url_for('admin_dashboard',curr_login_id=curr_login_id))
     
         except IntegrityError:
             db.session.rollback()
-            error_message="Subject already exists"
-            flash(error_message,'danger')
-            print(error_message) #for debugging purposes
+            flash("Subject already exists",'danger')
             return redirect(url_for('create_subject',curr_login_id=curr_login_id))
 
     return render_template("create_subject.html",curr_login_id=curr_login_id)
@@ -191,14 +172,11 @@ def update_subject(curr_login_id,subject_id):
             print("updated",subject.name, subject.description)
             db.session.commit()
 
-            print("subject updation Successful")  #for debugging purposes
             return redirect(url_for('admin_dashboard',curr_login_id=curr_login_id))
     
         except IntegrityError:
             db.session.rollback()
-            error_message="Subject already exists"
-            flash(error_message,'danger')
-            print(error_message) #for debugging purposes
+            flash("Subject already exists",'danger')
             return redirect(url_for('update_subject',curr_login_id=curr_login_id,subject_id=subject.id))
 
     return render_template("update_subject.html",curr_login_id=curr_login_id,subject=subject)
@@ -216,16 +194,12 @@ def delete_subject(curr_login_id,subject_id):
             db.session.delete(subject)
             db.session.commit()
 
-            print("subject deletion Successful")  #for debugging purposes
             return redirect(url_for('admin_dashboard',curr_login_id=curr_login_id))
         
-
     #have to deleted after testing    
-        except IntegrityError:
+        except :
             db.session.rollback()
-            error_message="Subject already exists"
-            flash(error_message,'danger')
-            print(error_message) #for debugging purposes
+            flash("Something went wrong",'danger')
             return redirect(url_for('delete_subject',curr_login_id=curr_login_id,subject_id=subject.id))
         
     return render_template("delete_subject.html",curr_login_id=curr_login_id,subject=subject)
@@ -241,21 +215,17 @@ def create_chapter(curr_login_id,subject_id):
     if request.method=='POST':
         chapter_name=request.form["chapter_name"].strip()
         chapter_description=request.form["chapter_description"].strip()
-        print(chapter_name, chapter_description) #for debugging purposes
 
         try:
             new_chapter=Chapter(name=chapter_name,description=chapter_description,subject_id=subject_id)
             db.session.add(new_chapter)
             db.session.commit()
 
-            print("new chapter addition Successful")  #for debugging purposes
             return redirect(url_for('admin_dashboard',curr_login_id=curr_login_id))
     
         except IntegrityError:
             db.session.rollback()
-            error_message="Chapter already exists"
-            flash(error_message,'danger')
-            print(error_message) #for debugging purposes
+            flash("Chapter already exists",'danger')
             return redirect(url_for('create_chapter',curr_login_id=curr_login_id,subject_id=subject_id))
 
     return render_template("create_chapter.html",curr_login_id=curr_login_id,subject=subject)
@@ -275,14 +245,11 @@ def update_chapter(curr_login_id,chapter_id):
             print("updated",chapter.name, chapter.description)
             db.session.commit()
 
-            print("chapter updation Successful")  #for debugging purposes
             return redirect(url_for('admin_dashboard',curr_login_id=curr_login_id))
     
         except IntegrityError:
             db.session.rollback()
-            error_message="Chapter already exists"
-            flash(error_message,'danger')
-            print(error_message) #for debugging purposes
+            flash("Chapter already exists",'danger')
             return redirect(url_for('update_chapter',curr_login_id=curr_login_id,chapter_id=chapter.id))
 
     return render_template("update_chapter.html",curr_login_id=curr_login_id,chapter=chapter)
@@ -300,11 +267,9 @@ def delete_chapter(curr_login_id,chapter_id):
             db.session.delete(chapter)
             db.session.commit()
 
-            print("Chapter deletion Successful")  #for debugging purposes
             return redirect(url_for('admin_dashboard',curr_login_id=curr_login_id))
         
-        #have to deleted after testing
-        except IntegrityError:
+        except :
             db.session.rollback()
             flash("Something went wrong, Try again",'danger')
             return redirect(url_for('delete_chapter',curr_login_id=curr_login_id,chapter_id=chapter.id))
@@ -359,24 +324,19 @@ def create_quiz(curr_login_id,subject_id):
         else:
             quiz_date = None
                         
-        # Convert the string to a datetime.time object
         if quiz_duration:
             quiz_duration = datetime.strptime(quiz_duration, "%H:%M").time()
         else:
             quiz_duration = None 
         
-        print(chapter_id,quiz_date, quiz_remarks, quiz_duration) #for debugging purposes
-
         try:
             new_quiz=Quiz(chapter_id=chapter_id,date_of_quiz=quiz_date,time_duration=quiz_duration,remarks=quiz_remarks)
             db.session.add(new_quiz)
             db.session.commit()
 
-            print("new Quiz addition Successful")  #for debugging purposes
             return redirect(url_for('quiz_dashboard',curr_login_id=curr_login_id))
     
-    #there should not be any issue of integrity error
-        except IntegrityError:
+        except :
             db.session.rollback()
             flash("Something went wrong, Try again",'danger')
             return redirect(url_for('create_chapter',curr_login_id=curr_login_id,subject_id=subject_id))
@@ -396,11 +356,9 @@ def delete_quiz(curr_login_id,quiz_id):
             db.session.delete(quiz)
             db.session.commit()
 
-            print("Quiz deletion Successful")  #for debugging purposes
             return redirect(url_for('quiz_dashboard',curr_login_id=curr_login_id))
     
-    #have to deleted after testing
-        except IntegrityError:
+        except :
             db.session.rollback()
             flash("Something went wrong, Try again",'danger')
             return redirect(url_for('delete_quiz',curr_login_id=curr_login_id,quiz_id=quiz_id))
@@ -441,19 +399,15 @@ def update_quiz(curr_login_id,subject_id,quiz_id):
             else:
                 quiz.date_of_quiz = None
 
-                   # Convert the string to a datetime.time object
             if request.form["time_of_quiz"]:
                 quiz.time_duration = datetime.strptime(request.form["time_of_quiz"], "%H:%M").time()
             else:
                 quiz.time_duration= None 
 
-            print(quiz.chapter_id,quiz.date_of_quiz, quiz.remarks, quiz.time_duration) #for debugging purposes
             db.session.commit()
-            print("Quiz updation Successful")  #for debugging purposes
             return redirect(url_for('quiz_dashboard',curr_login_id=curr_login_id))
     
-    #there should not be any issue of integrity error
-        except IntegrityError:
+        except :
             db.session.rollback()
             flash("Something went wrong, Try again",'danger')
             return redirect(url_for('update_quiz',curr_login_id=curr_login_id,subject_id=subject_id,quiz_id=quiz_id))
@@ -490,14 +444,11 @@ def create_question(curr_login_id,quiz_id):
             db.session.add(new_question)
             db.session.commit()
 
-            print("Question Addition Successful")  #for debugging purposes
             return redirect(url_for('question_dashboard', curr_login_id=curr_login_id, quiz_id=quiz_id))
         
         except IntegrityError:
             db.session.rollback()
-            error_message="Username (email) already exists"
-            flash(error_message,'danger')
-            print(error_message) #for debugging purposes
+            flash("Username (email) already exists",'danger')
             return redirect(url_for('create_question', curr_login_id=curr_login_id, quiz_id=quiz_id))
     return render_template("create_question.html",curr_login_id=curr_login_id,quiz_id=quiz_id)
 
@@ -519,15 +470,11 @@ def update_question(curr_login_id,question_id):
             question.correct_option=int(request.form["correct_option"])
             db.session.commit()
 
-            print("Question Updation Successful")  #for debugging purposes
             return redirect(url_for('question_dashboard', curr_login_id=curr_login_id, quiz_id=question.quiz.id))
 
-#should be removed before final as should not occurr       
-        except IntegrityError:
+        except :
             db.session.rollback()
-            error_message="Username (email) already exists"
-            flash(error_message,'danger')
-            print(error_message) #for debugging purposes
+            flash("Username (email) already exists",'danger')
             return redirect(url_for('update_question', curr_login_id=curr_login_id, question_id=question_id))
         
     return render_template("update_question.html",curr_login_id=curr_login_id,question=question)
@@ -546,11 +493,9 @@ def delete_question(curr_login_id,question_id):
             db.session.delete(question)
             db.session.commit()
 
-            print("Question deletion Successful")  #for debugging purposes
             return redirect(url_for('question_dashboard', curr_login_id=curr_login_id, quiz_id=quiz_id))
     
-    #have to deleted after testing
-        except IntegrityError:
+        except :
             db.session.rollback()
             flash("Something went wrong, Try again",'danger')
             return redirect(url_for('delete_question',curr_login_id=curr_login_id,question_id=question_id))
@@ -581,7 +526,6 @@ def edit_user(curr_login_id,user_id):
             user.qualification=request.form["qualification"].strip()
 
             db.session.commit()
-            print("User updation Successful")  #for debugging purposes
             return redirect(url_for('admin_dashboard_users',curr_login_id=curr_login_id))
 
         
@@ -603,11 +547,9 @@ def delete_user(curr_login_id,user_id):
         try:
             db.session.delete(user)
             db.session.commit()
-            print("Question deletion Successful")  #for debugging purposes
             return redirect(url_for('admin_dashboard_users',curr_login_id=curr_login_id))
     
-    #have to deleted after testing
-        except IntegrityError:
+        except :
             db.session.rollback()
             flash("Something went wrong, Try again",'danger')
             return redirect(url_for('delete_user',curr_login_id=curr_login_id,user_id=user_id))
@@ -615,7 +557,6 @@ def delete_user(curr_login_id,user_id):
     return render_template("delete_user.html",curr_login_id=curr_login_id,user=user)
 
 
-#function to check if the current user is authorised
 def is_user(curr_login_id):
     if "user_id" in session and session['user_id']==curr_login_id:
         user=User.query.get(curr_login_id) 
@@ -633,8 +574,6 @@ def user_dashboard(curr_login_id):
     return render_template("user_dashboard.html",user=user,quizes=quizes,todays_date=todays_date)
 
 
-from datetime import datetime
-
 @app.route('/user/<int:curr_login_id>/exam_portal/<int:quiz_id>', methods=['GET', 'POST'])
 def exam_portal(curr_login_id, quiz_id):
     if not is_user(curr_login_id):
@@ -651,16 +590,9 @@ def exam_portal(curr_login_id, quiz_id):
             selected_option = request.form.get(f'answer_{question.id}')  
             
             if selected_option and int(selected_option) == question.correct_option:
-                user_score += 1  # Increase score for correct answers
+                user_score += 1  
 
-        # Store the score in the database
-        new_score = Score(
-            quiz_id=quiz.id,
-            user_id=curr_login_id,
-            time_stamp=datetime.now(),
-            user_score=user_score,
-            total_score=total_score
-        )
+        new_score = Score(quiz_id=quiz.id, user_id=curr_login_id, time_stamp=datetime.now(), user_score=user_score, total_score=total_score)
         db.session.add(new_score)
         db.session.commit()
 
@@ -670,7 +602,14 @@ def exam_portal(curr_login_id, quiz_id):
     return render_template("exam_portal.html", quiz=quiz)
 
 
-
+@app.route('/user/<int:curr_login_id>/user_dashboard/score')
+def user_score(curr_login_id):
+    if not is_user(curr_login_id):
+        flash("You are not authorized","danger")
+        return redirect(url_for('logout'))
+    user=User.query.get_or_404(curr_login_id)
+    scores=Score.query.all()
+    return render_template("user_dashboard_scores.html",user=user,scores=scores)
 
 
 

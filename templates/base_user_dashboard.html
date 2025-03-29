@@ -16,7 +16,7 @@
             <h2 class="text-primary fw-bold">{% block header %} {% endblock %}</h1>
             <div >
                 <a href="{{ url_for('user_dashboard', curr_login_id=session['user_id'])}}" class="me-3">Home</a>
-                <a href="#" class="me-3">Summary</a>
+                <a href="{{ url_for('user_score', curr_login_id=session['user_id'])}}" class="me-3">Score</a>
                 <a href="{{ url_for('logout') }}" class="me-3">Logout</a>
             </div>
         </div>
