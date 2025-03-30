@@ -15,7 +15,7 @@ Welcome {{user.full_name}}
 
 <div class="row mt-4 justify-content-center">
     <div class="col-md-11">
-        <div class="card shadow-sm m-3 p-3">
+        <div class="card quiz-card shadow-sm m-3 p-3">
             <div class="d-flex ps-2">
 
             </div>
@@ -58,14 +58,13 @@ Welcome {{user.full_name}}
 function searchUsers() {
     const input = document.getElementById("search-box");
     const query = input.value.toUpperCase();
-    const quizCards = document.querySelectorAll(".card.shadow-sm"); // Select the quiz cards
-
+    const quizCards = document.querySelectorAll(".user-details"); 
     quizCards.forEach(quizCard => {
-        const userDetails = quizCard.innerText.toUpperCase(); // Get the visible text inside the quiz card
+        const userDetails = quizCard.innerHTML.toUpperCase(); 
         if (userDetails.includes(query)) {
-            quizCard.style.display = ""; // Show the card if it matches
+            quizCard.style.display = ""; 
         } else {
-            quizCard.style.display = "none"; // Hide if it doesn't match
+            quizCard.style.display = "none"; 
         }
     });
 }

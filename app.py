@@ -614,4 +614,4 @@ def user_score(curr_login_id):
 
 
 if __name__=='__main__':
-    app.run(debug=True)
+    app.run()
