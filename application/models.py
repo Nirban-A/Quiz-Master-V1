@@ -10,7 +10,7 @@ class User(db.Model):
     dob = db.Column(db.Date)
     role = db.Column(db.Boolean, nullable=False, default=False)  # True for admin
 
-    quizes_attempted = db.relationship('Score', backref='user') 
+    quizes_attempted = db.relationship('Score', backref='user', cascade='all, delete-orphan') 
 
 class Subject(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
